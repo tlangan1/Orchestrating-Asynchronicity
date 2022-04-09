@@ -124,33 +124,63 @@ var Observable = {
     return observable;
   },
 
+  //   fromProxy: function fromProxy(object) {
+  //     return {
+  //       forEach: function (observer) {
+  //         var handler = {
+  //           set: function (target, property, value) {
+  //             observer.onNext({ property, value });
+  //             console.log("property " + property + " set to " + value);
+  //             target[property] = value;
+  //           },
+  //           get: function (target, property) {
+  //             console.log("property " + property + " accessed");
+  //             return target[property];
+  //           },
+  //         };
+
+  //         var { proxy, revoke } = Proxy.revocable(object, handler);
+
+  //         return {
+  //           proxy,
+  //           subscription: {
+  //             dispose: function () {
+  //               revoke();
+  //             },
+  //           },
+  //         };
+  //       },
+  //     };
+  //   },
+
   fromProxy: function fromProxy(object) {
-    return {
-      forEach: function (observer) {
-        var handler = {
-          set: function (target, property, value) {
-            observer.onNext({ property, value });
-            console.log("property " + property + " set to " + value);
-            target[property] = value;
-          },
-          get: function (target, property) {
-            console.log("property " + property + " accessed");
-            return target[property];
-          },
-        };
+    var observable = Object.create(proto);
+    observable._forEach = function (observer) {
+      var handler = {
+        set: function (target, property, value) {
+          observer.onNext({ property, value });
+          console.log("property " + property + " set to " + value);
+          target[property] = value;
+        },
+        get: function (target, property) {
+          console.log("property " + property + " accessed");
+          return target[property];
+        },
+      };
 
-        var { proxy, revoke } = Proxy.revocable(object, handler);
+      var { proxy, revoke } = Proxy.revocable(object, handler);
 
-        return {
-          proxy,
-          subscription: {
-            dispose: function () {
-              revoke();
-            },
+      return {
+        proxy,
+        subscription: {
+          dispose: function () {
+            revoke();
           },
-        };
-      },
+        },
+      };
     };
+
+    return observable;
   },
 
   fromDOMMutationObserver: function fromDOMMutationObserver(
