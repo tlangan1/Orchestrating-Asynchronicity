@@ -76,18 +76,18 @@ var proto = {
 };
 
 var Observable = {
-  fromEvent: function (dom, eventName) {
+  fromEvent: function (targetNode, eventName) {
     var observable = Object.create(proto);
     observable._forEach = function (observer) {
       var handler = function (e) {
         observer.onNext(e);
       };
 
-      dom.addEventListener(eventName, handler);
+      targetNode.addEventListener(eventName, handler);
 
       return {
         dispose: function () {
-          dom.removeEventListener(eventName, handler);
+          targetNode.removeEventListener(eventName, handler);
         },
       };
     };
@@ -130,10 +130,11 @@ var Observable = {
         var handler = {
           set: function (target, property, value) {
             observer.onNext({ property, value });
+            console.log("property " + property + " set to " + value);
             target[property] = value;
           },
           get: function (target, property) {
-            console.log("property accessed");
+            console.log("property " + property + " accessed");
             return target[property];
           },
         };
@@ -152,8 +153,24 @@ var Observable = {
     };
   },
 
-  fromDOMMutationObserver: function fromDOMMutationObserver(object) {
-    const observer = new MutationObserver(callback);
+  fromDOMMutationObserver: function fromDOMMutationObserver(
+    targetNode,
+    observerOptions
+  ) {
+    var observable = Object.create(proto);
+    observable._forEach = function (observer) {
+      // the callback should come in the ForEach call
+      observer = new MutationObserver(observer.onNext);
+      observer.observe(targetNode, observerOptions);
+
+      return {
+        dispose: function () {
+          observer.disconnect();
+        },
+      };
+    };
+
+    return observable;
   },
 };
 

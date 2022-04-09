@@ -8,6 +8,10 @@
   <body>
     First Name: <input id="firstName" />
     <button id="button" onclick="proxy.firstName = 'wendy'">Click Me</button>
+    <button onclick="addAttribute()">
+      Add An Attribute to input 'first_name'
+    </button>
+    <button onclick="disableAttributeAdding()">Disable Attribute Adding</button>
   </body>
   <script src="observable-library.js"></script>
   <script>
@@ -42,6 +46,8 @@
     // *** Here is another example of using my observables library ***
     //-------------------------------------------------------
     // This is an example of a proxy observable.  The object being observed is 'obj' below.
+    // When the "first_name" property of "obj" is changed, the onNext executes which calls
+    // the function below which changes the value of the input assigning it to the new value.
     var obj = { firstName: "" };
 
     var proxyObservable = Observable.fromProxy(obj);
@@ -65,5 +71,48 @@
         obj.firstName = document.getElementById("firstName").value;
       },
     });
+
+    // *** Here is another example of using my observables library ***
+    //-------------------------------------------------------
+    // This observable is created from a DOM Mutation observer
+    // set on the "first name" input node
+
+    // This is just an object used to configure the underlying Mutation Observer
+    const observerOptions = {
+      childList: true,
+      attributes: true,
+
+      // Omit (or set to false) to observe only changes to the parent node
+      subtree: false,
+    };
+
+    // This is the observable that could be used in asynchronous orchestration
+    var DOMObserver = Observable.fromDOMMutationObserver(
+      document.getElementById("firstName"),
+      observerOptions
+    );
+
+    // This is a standalone implementation of the Mutation Observer
+    var DOMObserverHandle = DOMObserver.forEach(function (mutationRecord) {
+      mutationRecord.forEach(displayMutation);
+
+      // *** Helper fuctions for the executable code above ***
+      //-------------------------------------------------------
+
+      function displayMutation(mutation) {
+        switch (mutation.type) {
+          case "attributes":
+            console.log("attribute change " + mutation.attributeName);
+        }
+      }
+    });
+
+    function addAttribute() {
+      document.getElementById("firstName").setAttribute("tom", "langan");
+      document.getElementById("firstName").setAttribute("wendy", "langan");
+    }
+    function disableAttributeAdding() {
+      DOMObserverHandle.dispose();
+    }
   </script>
 </html>
