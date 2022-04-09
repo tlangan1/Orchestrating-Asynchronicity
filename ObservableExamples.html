@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    First Name: <input id="firstName" />
+    <button id="button" onclick="proxy.firstName = 'wendy'">Click Me</button>
+  </body>
+  <script src="observable-library.js"></script>
+  <script>
+    // *** Here is one example of using my observables library ***
+    //-------------------------------------------------------
+    // This is an example of a timer observable
+    var timer = Observable.fromTimer(5000);
+
+    //-------------------------------------------------------
+    // This is an example of a DOM event handler observable
+    // that is composed with the timer observable above through
+    // a takeUntil method.
+    // The result is that if you click the button before the timer
+    // fires then the location of where you clicked the button
+    // will be displayed in the console.
+
+    var dom = document.getElementById("button");
+    var oMeButton = Observable.fromEvent(dom, "click")
+      .map(function (e) {
+        console.log("clientX: ", e.clientX, " clientY: ", e.clientY);
+        return e;
+      })
+      .filter(function (e) {
+        return e.clientX > 300;
+      })
+      .takeUntil(timer);
+
+    oMeButton.forEach(function () {
+      console.log("Me button with function oberver clicked");
+    });
+
+    // *** Here is another example of using my observables library ***
+    //-------------------------------------------------------
+    // This is an example of a proxy observable.  The object being observed is 'obj' below.
+    var obj = { firstName: "" };
+
+    var proxyObservable = Observable.fromProxy(obj);
+
+    // The proxyObservable, "proxy", is created here
+    var { proxy, subscription } = proxyObservable.forEach({
+      onNext: function (e) {
+        document.getElementById(e.property).value = e.value;
+      },
+    });
+
+    proxy.firstName = "tom";
+
+    firstNameChanges = Observable.fromEvent(
+      document.getElementById("firstName"),
+      "change"
+    );
+
+    firstNameChanges.forEach({
+      onNext: function (e) {
+        obj.firstName = document.getElementById("firstName").value;
+      },
+    });
+  </script>
+</html>
