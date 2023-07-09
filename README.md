@@ -4,11 +4,10 @@ Included is a rudimentary observables library I authored, 'observable-library.js
 
 A call to Observable.[some observable initiator function] creates an object based on the custom prototype and then puts the function designed to initialize the particular observable in the \_forEach property. The library currently provides observable initiator functions for DOM events, intervals, timers, memory proxies and DOM mutation observers. Finally, it returns the following observable object:
 
-{
-
-\_forEach: a place to store the observable initiator function to use until it is subscribed to by a call to forEach.
-
-[[Prototype]]: my custom prototype object.
+{  
+ \_forEach: a place to store the observable initiator function to use until it is subscribed to by a call to forEach.  
+ [[Prototype]]: my custom prototype object.  
+}
 
 It is the prototype that contains the definition for forEach. This function abstracts away the fact that the supported observables can be called with either functions or an object.
 
