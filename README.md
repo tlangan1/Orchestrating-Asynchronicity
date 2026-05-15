@@ -16,4 +16,3 @@ The forEach function on the prototype works as follows:
 1. If the first parameter to forEach is a function, it assumes that the observer was passed in as separate functions to be used for onNext, onCompleted and onError in that order. At least onNext must be supplied. If onError or both onCompleted and onError are not supplied then noop functions are put in their place. These functions are then wrapped in an object.
 1. If the first parameter is an object, then it is used as is.
 1. In either event, forEach returns a subscription object which contains only a dispose() method.
-   }
